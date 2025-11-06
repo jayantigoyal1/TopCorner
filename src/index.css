@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Basic body styling to match our dark theme */
+body {
+  @apply bg-dark-bg text-text-light font-sans;
+}
