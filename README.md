@@ -40,3 +40,9 @@ You must have [Node.js](https://nodejs.org/en) (v18 or later) and `npm` installe
     ```
 5.  Open [http://localhost:5173](http://localhost:5173) (or the port specified in your terminal) in your browser to see the app.
 
+### Screenshots
+1. Landing Page
+<img width="2827" height="1449" alt="{8EE59FBD-1263-42BE-9ED8-EA123A3589D3}" src="https://github.com/user-attachments/assets/9b3d88a3-0a7b-4820-8321-8bd14f71d1c4" />
+
+2. Dashboard
+<img width="2525" height="1461" alt="{F57C7E49-1F98-4D06-B38F-2F46468E4FA1}" src="https://github.com/user-attachments/assets/26be2508-89f3-4985-be58-efcb6c23c77f" />
