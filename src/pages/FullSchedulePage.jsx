@@ -1,57 +1,150 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import MatchCard from '../components/MatchCard';
+import Button from '../components/Button';
 
 const FullSchedulePage = () => {
-  const [competitionFilter, setCompetitionFilter] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedLeague, setSelectedLeague] = useState('All'); 
 
-  const competitions = ["Premier League", "La Liga", "Bundesliga", "Ligue 1", "Serie A"];
-  const matches = [
-    { home: "Man Utd", away: "Chelsea", competition: "Premier League", date: "2024-10-05", status: "Pending" },
-    { home: "Barcelona", away: "Real Madrid", competition: "La Liga", date: "2024-10-07", status: "Pending" },
-  ];
+  // 1. Get Logged In User
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  const filteredMatches = matches.filter(
-    (match) =>
-      (competitionFilter === "" || match.competition === competitionFilter) &&
-      (match.home.toLowerCase().includes(searchTerm.toLowerCase()) || match.away.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  useEffect(() => {
+    fetchData(selectedDate);
+  }, [selectedDate]);
 
-  // Shared input style
-  const inputStyle = "bg-white border border-slate-300 text-slate-900 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100";
+  const fetchData = async (date) => {
+    setLoading(true);
+    setMatches([]); 
+
+    try {
+      // 2. Fetch Schedule AND User Predictions in parallel
+      const [scheduleRes, predictionsRes] = await Promise.all([
+        fetch(`http://localhost:5000/api/schedule?date=${date}`),
+        user ? fetch(`http://localhost:5000/api/predictions/${user.id || user._id}`) : Promise.resolve({ json: () => [] })
+      ]);
+
+      const scheduleData = await scheduleRes.json();
+      const predictionsData = await predictionsRes.json();
+
+      if (Array.isArray(scheduleData)) {
+        // 3. The MERGE Logic
+        const formatted = scheduleData.map(item => {
+          // Check if user has a prediction for this specific match ID
+          const myPrediction = Array.isArray(predictionsData) 
+            ? predictionsData.find(p => p.matchId === item.fixture.id)
+            : null;
+
+          return {
+            id: item.fixture.id,
+            status: item.fixture.status.short === 'NS' ? 'upcoming' : 
+                    ['FT', 'AET', 'PEN'].includes(item.fixture.status.short) ? 'finished' : 'live',
+            displayStatus: item.fixture.status.short,
+            
+            homeTeam: item.teams.home.name,
+            homeLogo: item.teams.home.logo,
+            awayTeam: item.teams.away.name,
+            awayLogo: item.teams.away.logo,
+            
+            homeScore: item.goals.home ?? 0,
+            awayScore: item.goals.away ?? 0,
+            date: item.fixture.date,
+            league: item.league.name,
+            leagueLogo: item.league.logo,
+            
+            // 4. Inject the prediction result (This makes the card turn green!)
+            userPrediction: myPrediction 
+              ? `${myPrediction.homeScore} - ${myPrediction.awayScore}` 
+              : null
+          };
+        });
+        setMatches(formatted);
+      } else {
+        setMatches([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch data", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const changeDate = (days) => {
+    const date = new Date(selectedDate);
+    date.setDate(date.getDate() + days);
+    setSelectedDate(date.toISOString().split('T')[0]);
+  };
+
+  const uniqueLeagues = ['All', ...new Set(matches.map(m => m.league))].sort();
+
+  const filteredMatches = selectedLeague === 'All' 
+    ? matches 
+    : matches.filter(m => m.league === selectedLeague);
+
+  const groupedMatches = filteredMatches.reduce((acc, match) => {
+    if (!acc[match.league]) acc[match.league] = [];
+    acc[match.league].push(match);
+    return acc;
+  }, {});
 
   return (
-    <div className="pt-8 px-0 md:px-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-extrabold mb-6 text-slate-900 dark:text-white">Full Schedule</h1>
-
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <select className={inputStyle} value={competitionFilter} onChange={(e) => setCompetitionFilter(e.target.value)}>
-          <option value="">All Competitions</option>
-          {competitions.map((comp) => <option key={comp} value={comp}>{comp}</option>)}
-        </select>
-        <input type="text" placeholder="Search teams..." className={`${inputStyle} flex-1`} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Match Schedule</h1>
+        
+        {matches.length > 0 && (
+          <select 
+            value={selectedLeague} 
+            onChange={(e) => setSelectedLeague(e.target.value)}
+            className="p-2 rounded-lg border border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+          >
+            {uniqueLeagues.map(league => (
+              <option key={league} value={league}>{league}</option>
+            ))}
+          </select>
+        )}
       </div>
 
-      {/* Matches Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredMatches.length === 0 && <p className="text-slate-500 dark:text-gray-400 col-span-full text-center mt-8">No matches found.</p>}
+      <div className="flex items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm mb-8 border border-slate-200 dark:border-slate-700">
+        <Button variant="outline" onClick={() => changeDate(-1)}>← Prev Day</Button>
+        <div className="text-center">
+          <label className="block text-xs text-slate-500 mb-1">Selected Date</label>
+          <input 
+            type="date" 
+            value={selectedDate} 
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="bg-slate-100 dark:bg-slate-700 border-none rounded-md px-3 py-1 font-semibold text-slate-900 dark:text-white"
+          />
+        </div>
+        <Button variant="outline" onClick={() => changeDate(1)}>Next Day →</Button>
+      </div>
 
-        {filteredMatches.map((match, idx) => (
-          <div key={idx} className="rounded-xl p-5 flex flex-col gap-3 transition shadow-sm border bg-white border-slate-200 hover:border-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-teal-500">
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-lg text-slate-900 dark:text-white">{match.home}</span>
-              <span className="text-slate-400 font-medium text-sm">VS</span>
-              <span className="font-bold text-lg text-slate-900 dark:text-white">{match.away}</span>
-            </div>
-            <div className="flex justify-between text-sm text-slate-500 dark:text-gray-400 border-t border-slate-100 dark:border-gray-700 pt-3">
-              <span>{match.competition}</span>
-              <span>{match.date}</span>
-            </div>
-            <div className="self-start mt-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-              {match.status}
-            </div>
-          </div>
-        ))}
+      <div className="space-y-8">
+        {loading ? (
+           <div className="text-center py-10">
+             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto mb-4"></div>
+             <p className="text-slate-500">Loading matches...</p>
+           </div>
+        ) : matches.length > 0 ? (
+           Object.keys(groupedMatches).map(leagueName => (
+             <div key={leagueName} className="animate-fade-in">
+               <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-3 border-l-4 border-blue-500 pl-3">
+                 {leagueName}
+               </h3>
+               <div className="space-y-4">
+                 {groupedMatches[leagueName].map(match => (
+                   <MatchCard key={match.id} match={match} showPrediction={true} />
+                 ))}
+               </div>
+             </div>
+           ))
+        ) : (
+           <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+             <p className="text-slate-500 dark:text-slate-400">No matches found for this date.</p>
+           </div>
+        )}
       </div>
     </div>
   );

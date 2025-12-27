@@ -1,50 +1,101 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Button, { PRIMARY_BLUE } from '../components/Button';
 import StatsCard from '../components/StatsCard';
 import MatchCard from '../components/MatchCard';
 
-const mockData = {
-  matches: [
-    { id: 1, status: 'upcoming', homeTeam: 'Chelsea', awayTeam: 'Arsenal', date: '2025-10-20 15:00', league: 'EPL', userPrediction: 'Chelsea 2-1 Arsenal' },
-    { id: 2, status: 'upcoming', homeTeam: 'Man Utd', awayTeam: 'Liverpool', date: '2025-10-21 17:30', league: 'EPL', userPrediction: null },
-    { id: 3, status: 'upcoming', homeTeam: 'PSG', awayTeam: 'Monaco', date: '2025-10-22 20:00', league: 'Ligue 1', userPrediction: 'PSG 3-1 Monaco' },
-    { id: 4, status: 'finished', homeTeam: 'Real Madrid', awayTeam: 'Barcelona', date: '2025-10-18 20:00', league: 'La Liga', userPrediction: 'Real Madrid 2-2 Barcelona' },
-  ],
-  leagues: [
-    { id: 'L1', name: 'The Premier League Predictors', userRank: 3, members: 45 },
-  ],
-  friendsActivity: [
-    { id: 1, user: 'JaneDoe', action: 'predicted Chelsea 1-1 Arsenal', time: '5 mins ago', points: 0 },
-    { id: 2, user: 'AlexF', action: 'won 10 points in the La Liga match', time: '1 hour ago', points: 10 },
-    { id: 3, user: 'Sam_G', action: 'joined The Championship League', time: '2 hours ago', points: 0 },
-  ]
-};
+const Dashboard = () => {
+  // 1. Get User from Local Storage (Logged in state)
+  const [user, setUser] = useState(null);
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const Dashboard = ({ currentUser }) => {
-  const user = currentUser || {
-    name: 'Guest Predictor',
-    points: 1250,
-    accuracy: 65,
-    rank: 1204,
-    totalPredictions: 78
+  useEffect(() => {
+    // Load User
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+
+    // Load Real Matches
+    fetchLiveMatches();
+  }, []);
+
+  const fetchLiveMatches = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/matches');
+      const data = await response.json();
+
+      // Check if the API returned an error or empty array
+      if (!data || !Array.isArray(data)) {
+         console.error("API returned invalid data:", data);
+         setMatches([]);
+         setLoading(false);
+         return;
+      }
+
+      const formattedMatches = data.map(item => {
+        // --- STATUS TRANSLATION LOGIC ---
+        const apiStatus = item.fixture.status.short; // e.g., 'NS', '1H', 'FT'
+        let appStatus = 'upcoming'; // Default
+
+        // If game is live (1st Half, 2nd Half, Halftime, Extra Time, Penalties)
+        if (['1H', 'HT', '2H', 'ET', 'P', 'LIVE'].includes(apiStatus)) {
+          appStatus = 'live';
+        } 
+        // If game is finished
+        else if (['FT', 'AET', 'PEN'].includes(apiStatus)) {
+          appStatus = 'finished';
+        }
+        
+        return {
+          id: item.fixture.id,
+          status: appStatus, 
+          displayStatus: apiStatus, 
+          
+          // --- TEAM INFO (Fixed to include logos) ---
+          homeTeam: item.teams.home.name,
+          homeLogo: item.teams.home.logo, // <--- ADDED THIS
+          
+          awayTeam: item.teams.away.name,
+          awayLogo: item.teams.away.logo, // <--- ADDED THIS
+
+          homeScore: item.goals.home ?? 0,
+          awayScore: item.goals.away ?? 0,
+          date: item.fixture.date,
+          league: item.league.name,
+          userPrediction: null 
+        };
+      });
+
+      setMatches(formattedMatches);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching matches:", err);
+      setError("Failed to load live scores.");
+      setLoading(false);
+    }
   };
 
-  const upcomingMatches = mockData.matches.filter(match => match.status === 'upcoming').slice(0, 3);
-  const mainLeague = mockData.leagues[0];
-  const recentActivity = mockData.friendsActivity.slice(0, 4);
+  // Mock data for things we haven't built APIs for yet (Leagues/Activity)
+  const mainLeague = { id: 'L1', name: 'The Premier League Predictors', userRank: 3, members: 45 };
+  const recentActivity = [
+    { id: 1, user: 'JaneDoe', action: 'predicted Chelsea 1-1 Arsenal', time: '5 mins ago', points: 0 },
+    { id: 2, user: 'AlexF', action: 'won 10 points in the La Liga match', time: '1 hour ago', points: 10 },
+  ];
 
   return (
-    // REMOVED bg-slate-900. Added pb-8 for spacing at bottom.
     <div className="py-8 font-['Inter',_sans-serif]"> 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Welcome Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-slate-900 dark:text-white">
-            Welcome back, {user?.name || 'User'}! ⚽
+            Welcome back, {user?.fullName || 'Guest'}! ⚽
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Ready to make some winning predictions?
+            {matches.length > 0 ? `There are ${matches.length} matches happening right now!` : "No live matches at the moment."}
           </p>
         </div>
 
@@ -79,35 +130,45 @@ const Dashboard = ({ currentUser }) => {
               <span className="text-indigo-500 dark:text-indigo-400">📊</span> <span>Your Stats Summary</span>
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatsCard title="Total Points" value={user?.points} subtitle="Current season" icon="🎯" trend="up" />
-              <StatsCard title="Accuracy" value={`${user?.accuracy}%`} subtitle="Prediction rate" icon="📈" trend="up" />
-              <StatsCard title="Global Rank" value={`#${user?.rank}`} subtitle="Worldwide" icon="🌍" trend="down" />
-              <StatsCard title="Predictions" value={user?.totalPredictions} subtitle="This season" icon="⚽" trend="flat" />
+              <StatsCard title="Total Points" value={user?.points || 0} subtitle="Current season" icon="🎯" trend="up" />
+              <StatsCard title="Accuracy" value="0%" subtitle="Prediction rate" icon="📈" trend="flat" />
+              <StatsCard title="Global Rank" value="#--" subtitle="Worldwide" icon="🌍" trend="flat" />
+              <StatsCard title="Predictions" value="0" subtitle="This season" icon="⚽" trend="flat" />
             </div>
           </div>
         </div>
 
-        {/* Upcoming Matches & Activity Feed */}
+        {/* Live Matches Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold flex items-center space-x-2 text-slate-900 dark:text-white">
-                <span className="text-purple-500 dark:text-purple-400">🔮</span> <span>Upcoming Matches</span>
+                <span className="text-red-500 animate-pulse">●</span> <span>Live Action</span>
               </h2>
-              <Link to="/schedule">
-                <Button variant="outline" size="sm">View All</Button>
-              </Link>
+              <button onClick={fetchLiveMatches} className="text-sm text-blue-500 hover:underline">
+                Refresh
+              </button>
             </div>
+            
             <div className="space-y-4">
-              {upcomingMatches.map((match) => (
+              {loading && <p className="text-slate-500 dark:text-slate-400">Loading live scores...</p>}
+              
+              {!loading && matches.length === 0 && (
+                <div className="p-6 rounded-xl text-center bg-white border border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+                  <p className="text-slate-500 dark:text-slate-400 mb-2">No matches are live right now.</p>
+                  <Link to="/schedule">
+                    <Button variant="outline" size="sm">Check Schedule</Button>
+                  </Link>
+                </div>
+              )}
+
+              {matches.map((match) => (
                 <MatchCard key={match.id} match={match} showPrediction={true} />
               ))}
-              {upcomingMatches.length === 0 && (
-                <p className="p-4 rounded-xl text-center bg-white text-slate-500 dark:bg-slate-800 dark:text-slate-400">No upcoming matches!</p>
-              )}
             </div>
           </div>
 
+          {/* Activity Feed */}
           <div>
             <h2 className="text-xl font-semibold mb-6 flex items-center space-x-2 text-slate-900 dark:text-white">
               <span className="text-teal-500 dark:text-teal-400">👥</span> <span>Friends Activity</span>
@@ -129,22 +190,7 @@ const Dashboard = ({ currentUser }) => {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-                <Link to="/leagues">
-                  <Button variant="outline" size="sm" className="w-full">View All Activity</Button>
-                </Link>
-              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-8 rounded-xl p-6 border bg-white border-slate-200 shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:shadow-none">
-          <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link to="/leagues"><Button variant="primary" className="w-full">🏆 Create New League</Button></Link>
-            <Link to="/leagues"><Button variant="secondary" className="w-full">🔗 Join League</Button></Link>
-            <Link to="/schedule"><Button variant="accent" className="w-full">📅 View Schedule</Button></Link>
           </div>
         </div>
       </div>
