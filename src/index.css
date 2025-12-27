@@ -2,7 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Optional: Basic body styling to match our dark theme */
+html {
+  transition: background-color 0.3s, color 0.3s;
+}
+
 body {
-  @apply bg-dark-bg text-text-light font-sans;
+  /* Default (Light Mode) = Creme Background, Dark Text */
+  @apply font-sans bg-[#f6f1eb] text-slate-900; 
+  
+  /* Dark Mode = Slate 900 Background, Light Text */
+  @apply dark:bg-slate-900 dark:text-slate-100;
 }
