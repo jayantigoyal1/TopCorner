@@ -25,7 +25,7 @@ const MatchCard = ({ match, showPrediction }) => {
 
     // 3. Send to Backend
     try {
-      const response = await fetch('${API_BASE_URL}/api/predict', {
+      const response = await fetch(`${API_BASE_URL}/api/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
