@@ -40,7 +40,6 @@ const LoginPage = () => {
 
       // 3. Redirect to Dashboard
       navigate("/dashboard");
-      // Optional: Force a reload so Navbar updates with the new user state
       window.location.reload(); 
 
     } catch (err) {

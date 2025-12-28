@@ -15,7 +15,7 @@ router.post('/signup', async (req, res) => {
       fullName: req.body.fullName,
       username: req.body.username,
       email: req.body.email,
-      password: req.body.password, // Storing plain text for now (will secure later)
+      password: req.body.password,
     });
 
     // 3. Save to DB

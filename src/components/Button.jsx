@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Define a primary blue color constant for theme consistency
 export const PRIMARY_BLUE = "text-blue-500";
 
 const Button = ({ children, variant, size, className, ...props }) => {

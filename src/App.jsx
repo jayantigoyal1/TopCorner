@@ -1,9 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-
-import Navbar from './components/Navbar';  // make sure path matches your folder
-
+import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import MyLeaguesPage from './pages/MyLeaguesPage';

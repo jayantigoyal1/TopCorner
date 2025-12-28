@@ -114,7 +114,7 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Footer removed: Layout.jsx handles it */}
+      {}
     </div>
   );
 }
