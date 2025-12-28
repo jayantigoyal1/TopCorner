@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import MatchCard from '../components/MatchCard';
 import Button from '../components/Button';
 import API_BASE_URL from '../config';
-import API_BASE_URL from '../config';
 
 const FullSchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
