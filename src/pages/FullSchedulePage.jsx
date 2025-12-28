@@ -55,7 +55,7 @@ const FullSchedulePage = () => {
             league: item.league.name,
             leagueLogo: item.league.logo,
             
-            // 4. Inject the prediction result (This makes the card turn green!)
+            // 4. Inject the prediction result
             userPrediction: myPrediction 
               ? `${myPrediction.homeScore} - ${myPrediction.awayScore}` 
               : null
@@ -78,7 +78,45 @@ const FullSchedulePage = () => {
     setSelectedDate(date.toISOString().split('T')[0]);
   };
 
-  const uniqueLeagues = ['All', ...new Set(matches.map(m => m.league))].sort();
+  // --- NEW SORTING LOGIC ---
+  // Define the "Big Leagues" that should always be at the top
+  const priorityLeagues = [
+    "UEFA Champions League", 
+    "Premier League", 
+    "La Liga", 
+    "Bundesliga", 
+    "Serie A", 
+    "Ligue 1", 
+    "UEFA Europa League", 
+    "Major League Soccer", 
+    "Saudi Pro League",
+    "Brasileirão Série A",
+    "Eredivisie"
+  ];
+
+  // Helper function to sort leagues: Priority First, then Alphabetical
+  const sortLeagues = (a, b) => {
+    if (a === 'All') return -1;
+    if (b === 'All') return 1;
+    
+    const indexA = priorityLeagues.indexOf(a);
+    const indexB = priorityLeagues.indexOf(b);
+
+    // If both are VIP leagues, sort by our defined order
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+
+    // If only A is VIP, put it first
+    if (indexA !== -1) return -1;
+
+    // If only B is VIP, put it first
+    if (indexB !== -1) return 1;
+
+    // Otherwise, standard alphabetical sort
+    return a.localeCompare(b);
+  };
+
+  // Generate sorted list for Dropdown
+  const uniqueLeagues = ['All', ...new Set(matches.map(m => m.league))].sort(sortLeagues);
 
   const filteredMatches = selectedLeague === 'All' 
     ? matches 
@@ -95,14 +133,18 @@ const FullSchedulePage = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Match Schedule</h1>
         
+        {/* League Filter Dropdown */}
         {matches.length > 0 && (
           <select 
             value={selectedLeague} 
             onChange={(e) => setSelectedLeague(e.target.value)}
-            className="p-2 rounded-lg border border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+            className="p-2 rounded-lg border border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none max-w-[200px]"
           >
             {uniqueLeagues.map(league => (
-              <option key={league} value={league}>{league}</option>
+              <option key={league} value={league}>
+                {/* Add a star if it's a priority league for visual clarity */}
+                {priorityLeagues.includes(league) ? `★ ${league}` : league}
+              </option>
             ))}
           </select>
         )}
@@ -129,10 +171,12 @@ const FullSchedulePage = () => {
              <p className="text-slate-500">Loading matches...</p>
            </div>
         ) : matches.length > 0 ? (
-           Object.keys(groupedMatches).map(leagueName => (
+           // Sort the display groups using the same logic
+           Object.keys(groupedMatches).sort(sortLeagues).map(leagueName => (
              <div key={leagueName} className="animate-fade-in">
-               <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-3 border-l-4 border-blue-500 pl-3">
+               <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-3 border-l-4 border-blue-500 pl-3 flex items-center gap-2">
                  {leagueName}
+                 {priorityLeagues.includes(leagueName) && <span className="text-yellow-500 text-sm">★</span>}
                </h3>
                <div className="space-y-4">
                  {groupedMatches[leagueName].map(match => (
