@@ -4,7 +4,6 @@ import Button, { PRIMARY_BLUE } from '../components/Button';
 import StatsCard from '../components/StatsCard';
 import MatchCard from '../components/MatchCard';
 import API_BASE_URL from '../config';
-import API_BASE_URL from '../config';
 
 const Dashboard = () => {
   // State
