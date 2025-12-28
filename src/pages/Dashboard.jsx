@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import Button, { PRIMARY_BLUE } from '../components/Button';
 import StatsCard from '../components/StatsCard';
 import MatchCard from '../components/MatchCard';
+import API_BASE_URL from '../config';
+import API_BASE_URL from '../config';
 
 const Dashboard = () => {
   // State
@@ -34,7 +36,7 @@ const Dashboard = () => {
   // --- API CALLS ---
   const fetchLiveMatches = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/matches');
+      const response = await fetch(`${API_BASE_URL}/api/matches`);
       const data = await response.json();
       if (!data || !Array.isArray(data)) { setMatches([]); return; }
 
@@ -65,7 +67,7 @@ const Dashboard = () => {
 
   const fetchUserLeagues = async (userId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/leagues/user/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/leagues/user/${userId}`);
       const data = await res.json();
       if (Array.isArray(data)) setLeagues(data);
     } catch (err) { console.error(err); }
@@ -73,7 +75,7 @@ const Dashboard = () => {
 
   const fetchFeaturedLeagues = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/leagues/featured`);
+      const res = await fetch(`${API_BASE_URL}/api/leagues/featured`);
       const data = await res.json();
       if (Array.isArray(data)) setFeaturedLeagues(data);
     } catch (err) { console.error(err); }
@@ -81,7 +83,7 @@ const Dashboard = () => {
 
   const fetchActivity = async (userId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/activity/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/activity/${userId}`);
       const data = await res.json();
       if (Array.isArray(data)) setActivity(data);
     } catch (err) { console.error(err); }
@@ -89,7 +91,7 @@ const Dashboard = () => {
 
   const fetchUserStats = async (userId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${userId}/stats`);
+      const res = await fetch(`${API_BASE_URL}/api/users/${userId}/stats`);
       const data = await res.json();
       if (res.ok) setStats(data);
     } catch (err) { console.error(err); }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import html2canvas from 'html2canvas';
+import API_BASE_URL from '../config';
 
 const UserProfilePage = () => {
   // State for User Data
@@ -28,15 +29,15 @@ const UserProfilePage = () => {
   const fetchUserData = async () => {
     try {
       // 1. Fetch Stats
-      const statsRes = await fetch(`http://localhost:5000/api/users/${userId}/stats`);
+      const statsRes = await fetch(`${API_BASE_URL}/api/users/${userId}/stats`);
       const statsData = await statsRes.json();
 
       // 2. Fetch Leagues
-      const leaguesRes = await fetch(`http://localhost:5000/api/leagues/user/${userId}`);
+      const leaguesRes = await fetch(`${API_BASE_URL}/api/leagues/user/${userId}`);
       const leaguesData = await leaguesRes.json();
 
       // 3. Fetch Predictions
-      const predsRes = await fetch(`http://localhost:5000/api/predictions/${userId}`);
+      const predsRes = await fetch(`${API_BASE_URL}/api/predictions/${userId}`);
       const predsData = await predsRes.json();
 
       // 4. Fetch User Details (To get Badges)
@@ -65,7 +66,7 @@ const UserProfilePage = () => {
     e.preventDefault();
     setMessage("");
     try {
-        const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(profile)

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; 
+import API_BASE_URL from '../config';
 
 const MyLeaguesPage = () => {
   const [leagues, setLeagues] = useState([]);
@@ -25,7 +26,7 @@ const MyLeaguesPage = () => {
 
   const fetchLeagues = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/leagues/user/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/leagues/user/${userId}`);
       const data = await res.json();
       setLeagues(data);
       setLoading(false);
@@ -41,7 +42,7 @@ const MyLeaguesPage = () => {
     if (!userId) return alert("Please login first");
 
     try {
-      const res = await fetch('http://localhost:5000/api/leagues/create', {
+      const res = await fetch('${API_BASE_URL}/api/leagues/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, name: leagueName })
@@ -66,7 +67,7 @@ const MyLeaguesPage = () => {
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:5000/api/leagues/join', {
+      const res = await fetch('${API_BASE_URL}/api/leagues/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, code: joinCode.toUpperCase() }) // Force uppercase

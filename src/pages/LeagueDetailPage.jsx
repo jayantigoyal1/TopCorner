@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import API_BASE_URL from '../config';
 
 const LeagueDetailPage = () => {
   const { id } = useParams(); // Get League ID from URL
@@ -18,7 +19,7 @@ const LeagueDetailPage = () => {
     const fetchAllData = async () => {
       try {
         // 1. Fetch League Details
-        const leagueRes = await fetch(`http://localhost:5000/api/leagues/${id}`);
+        const leagueRes = await fetch(`${API_BASE_URL}/api/leagues/${id}`);
         const leagueData = await leagueRes.json();
         
         if (leagueRes.ok) {
@@ -32,7 +33,7 @@ const LeagueDetailPage = () => {
 
         // 2. Fetch User Predictions (If logged in)
         if (userId) {
-          const predRes = await fetch(`http://localhost:5000/api/predictions/${userId}`);
+          const predRes = await fetch(`${API_BASE_URL}/api/predictions/${userId}`);
           const predData = await predRes.json();
           if (predRes.ok) {
             setPredictions(predData);
@@ -137,7 +138,7 @@ const LeagueDetailPage = () => {
                         onClick={async () => {
                             const btn = document.getElementById('sync-btn');
                             btn.innerText = "Processing...";
-                            await fetch('http://localhost:5000/api/calc-points', { method: 'POST' });
+                            await fetch('${API_BASE_URL}/api/calc-points', { method: 'POST' });
                             alert("Scores Updated! Refreshing page...");
                             window.location.reload();
                         }}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MatchCard from '../components/MatchCard';
 import Button from '../components/Button';
+import API_BASE_URL from '../config';
+import API_BASE_URL from '../config';
 
 const FullSchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -22,8 +24,8 @@ const FullSchedulePage = () => {
     try {
       // 2. Fetch Schedule AND User Predictions in parallel
       const [scheduleRes, predictionsRes] = await Promise.all([
-        fetch(`http://localhost:5000/api/schedule?date=${date}`),
-        user ? fetch(`http://localhost:5000/api/predictions/${user.id || user._id}`) : Promise.resolve({ json: () => [] })
+        fetch(`${API_BASE_URL}/api/schedule?date=${date}`),
+        user ? fetch(`${API_BASE_URL}/api/predictions/${user.id || user._id}`) : Promise.resolve({ json: () => [] })
       ]);
 
       const scheduleData = await scheduleRes.json();
