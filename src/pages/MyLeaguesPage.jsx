@@ -42,7 +42,7 @@ const MyLeaguesPage = () => {
     if (!userId) return alert("Please login first");
 
     try {
-      const res = await fetch('${API_BASE_URL}/api/leagues/create', {
+      const res = await fetch(`${API_BASE_URL}/api/leagues/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, name: leagueName })
@@ -67,7 +67,7 @@ const MyLeaguesPage = () => {
     setError(null);
 
     try {
-      const res = await fetch('${API_BASE_URL}/api/leagues/join', {
+      const res = await fetch(`${API_BASE_URL}/api/leagues/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, code: joinCode.toUpperCase() }) // Force uppercase
