@@ -1,48 +1,102 @@
 # ⚽ TopCorner
-TopCorner is a football fan app where users create or join leagues to compete with friends. Core functionality includes predicting match outcomes, a real-time leaderboard tracking points and rankings, and getting match schedules for favorite clubs. The app is a hub for football enthusiasts, bringing a competitive and social element to the game.
+
+**TopCorner** is a full-stack fantasy football web application where users can explore match schedules, predict match outcomes, create private leagues, and compete on leaderboards. Powered by the **Football-Data.org API**, the app provides reliable football fixture and result data while enabling league-based competition and score prediction gameplay.
+
+TopCorner is designed to make football viewing more engaging by turning matches into a social and competitive experience.
+
+---
 
 ## ✨ Features
-* **User Authentication:** Secure `SignupPage` and `LoginPage` for users.
-* **League Management:** `MyLeaguesPage` to view all joined leagues and `LeagueDetailPage` for specific league stats and leaderboards.
-* **Main Dashboard:** A central `Dashboard` to see upcoming matches and user stats.
-* **Match Predictions:** `MatchCard` components allow users to make and view predictions.
-* **Schedules:** A `FullSchedulePage` to browse all upcoming games.
-* **Clean UI:** A component-based layout (`Layout.jsx`, `Navbar.jsx`, `Footer.jsx`) for a consistent user experience.
+
+- **Match Schedules & Results**  
+  Browse upcoming and past football matches across major competitions using the Football-Data.org API.
+
+- **Score Predictions**  
+  Predict match scores before kickoff with automatic prediction locking once matches start.
+
+- **Private Leagues**  
+  Create or join leagues using invite codes and compete with friends.
+
+- **Leaderboards**  
+  Dynamic league leaderboards ranked by points earned from predictions.
+
+- **Automated Point System**  
+  Predictions are evaluated after matches finish using a custom scoring engine.
+
+- **Dashboard Overview**  
+  A central dashboard to view recent matches, leagues, stats, and activity.
+
+- **Dark & Light Theme**  
+  Fully responsive UI with support for both dark and light modes.
+
+- **Modern UI Architecture**  
+  Reusable component-based layout for a consistent user experience.
+
+---
 
 ## 🛠️ Tech Stack
-* **Frontend:** [React.js](https://react.dev/)
-* **Build Tool:** [Vite](https://vitejs.dev/)
-* **Language:** JavaScript (JSX)
-* **Styling:** CSS (`index.css`)
+
+### Frontend
+- React.js
+- Vite
+- JavaScript (JSX)
+- Tailwind CSS
+
+### Backend
+- Node.js
+- Express
+- MongoDB
+- Football-Data.org API (v4)
+
+### Deployment
+- Vercel (Frontend)
+- Render (Backend)
+
+---
 
 ## 🚀 Getting Started
-To get a local copy up and running, follow these simple steps.
+
+Follow these steps to run the project locally.
 
 ### Prerequisites
-You must have [Node.js](https://nodejs.org/en) (v18 or later) and `npm` installed on your machine.
+- Node.js (v18 or later)
+- npm
+
+---
 
 ### Installation
-1.  **Clone the repo:**
-    ```sh
-    git clone [https://github.com/jayantigoyal1/TopCorner.git](https://github.com/jayantigoyal1/TopCorner.git)
-    ```
-2.  **Navigate to the project directory:**
+
+1. **Clone the repository**
+   ```sh
+   git clone https://github.com/jayantigoyal1/TopCorner.git
+
+2. **Navigate to the project directory**
     ```sh
     cd TopCorner
-    ```
-3.  **Install NPM packages:**
+
+3. **Install dependencies**
     ```sh
     npm install
-    ```
-4.  **Run the development server:**
+
+3. **Start the development server**
     ```sh
     npm run dev
-    ```
-5.  Open [http://localhost:5173](http://localhost:5173) (or the port specified in your terminal) in your browser to see the app.
 
-### Screenshots
-1. Landing Page
-<img width="2827" height="1449" alt="{8EE59FBD-1263-42BE-9ED8-EA123A3589D3}" src="https://github.com/user-attachments/assets/9b3d88a3-0a7b-4820-8321-8bd14f71d1c4" />
+## 🎥 Demo Video
+https://github.com/user-attachments/assets/645687e3-7f1b-4bf3-8c82-aa970cde0a40
 
-2. Dashboard
-<img width="2525" height="1461" alt="{F57C7E49-1F98-4D06-B38F-2F46468E4FA1}" src="https://github.com/user-attachments/assets/26be2508-89f3-4985-be58-efcb6c23c77f" />
+## 📌 Notes
+
+- Match data availability depends on Football-Data.org free-tier limitations, including delayed scores.
+- Authentication features are currently under development and will be added in future updates.
+- Prediction locking is enforced based on match kickoff time to ensure fair play.
+
+
+## 🌱 Future Improvements
+
+- User authentication & profiles
+- Editable predictions before kickoff
+- Countdown timers for prediction lock
+- Enhanced league analytics
+- Notification system
+
