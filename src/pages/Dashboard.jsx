@@ -43,7 +43,7 @@ const Dashboard = () => {
   const recentMatches = matches
   .filter(m => m.status === 'FINISHED')
   .sort((a, b) => new Date(b.date) - new Date(a.date))
-  .slice(0, 3);
+  .slice(0, 2);
   
   const fetchLiveMatches = async () => {
     try {
